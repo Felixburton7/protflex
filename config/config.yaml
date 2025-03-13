@@ -1,0 +1,73 @@
+input:
+  data_dir: ~/drFelix/data_15
+  voxel_dir: processed/voxelized_output
+  rmsf_dir: interim/per-residue-rmsf
+  temperature: 320  # Can be a specific temperature (320, 348, 379, 413, 450) or "average"
+  domain_ids: []  # Empty means process all domains
+  use_metadata: true
+  metadata_fields:
+    - resname_encoded
+    - normalized_resid
+    - secondary_structure_encoded
+    - core_exterior_encoded
+    - relative_accessibility
+
+output:
+  base_dir: ~/protflex_results
+  model_dir: models
+  results_dir: results
+  visualizations_dir: visualizations
+  log_file: protflex.log
+
+model:
+  # Model architecture options: "protflex_cnn", "dilated_resnet3d", "multipath_rmsf_net"
+  architecture: multipath_rmsf_net
+  input_channels: 5  # C, N, O, CA, CB channels
+  channel_growth_rate: 1.5
+  num_residual_blocks: 4
+  use_multiscale: true
+  use_bottleneck: true
+  dropout_rate: 0.3
+  include_metadata: true
+  base_filters: 32  # Base number of filters for convolutional layers
+
+training:
+  batch_size: 32
+  num_epochs: 100
+  learning_rate: 0.001
+  weight_decay: 1e-5
+  early_stopping_patience: 10
+  # Options: "reduce_on_plateau", "cosine_annealing", "step", "exponential"
+  lr_scheduler: reduce_on_plateau
+  lr_scheduler_params:
+    factor: 0.5
+    patience: 5
+  train_split: 0.7
+  val_split: 0.15
+  test_split: 0.15
+  random_seed: 42
+  # Augmentation options
+  use_augmentation: true
+  augmentation_params:
+    rotation_prob: 0.5
+    rotation_angles: [90, 180, 270]
+    flip_prob: 0.3
+    noise_prob: 0.2
+    noise_scale: 0.05
+
+logging:
+  level: INFO
+  console_level: INFO
+  file_level: DEBUG
+  show_progress_bars: true
+
+visualization:
+  plot_loss: true
+  plot_predictions: true
+  plot_residue_type_analysis: true
+  plot_error_distribution: true
+  save_format: png
+  dpi: 300
+  plot_correlation: true
+  plot_amino_acid_performance: true
+  max_scatter_points: 1000  # Limit for scatter plots to prevent overcrowding
